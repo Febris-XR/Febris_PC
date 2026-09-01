@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--<Style BasedOn="{StaticResource {x:Type ToggleSwitch}}"
+           TargetType="{x:Type CheckBox}"
+           x:Key="ToggleSwitchTheme">-->
+        <!--<Style.Setters>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Grid VerticalAlignment="Stretch"
+                              Background="{TemplateBinding Background}">
+
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="#1ABB9C"></Setter>
+            </Trigger>
+        </Style.Triggers>-->
+    <!--</Style>-->
+
+</ResourceDictionary>

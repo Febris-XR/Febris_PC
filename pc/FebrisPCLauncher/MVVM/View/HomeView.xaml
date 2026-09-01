@@ -1,0 +1,163 @@
+﻿<UserControl x:Class="Febris.PCLauncherV3.MVVM.View.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Febris.PCLauncherV3.MVVM.View"
+             xmlns:viewModel="clr-namespace:Febris.PCLauncherV3.MVVM.ViewModel"
+             mc:Ignorable="d" 
+             Margin="0"             
+             d:DesignWidth="600"
+             d:DesignHeight="425"
+             Background="Transparent"             
+             >
+    <!--<UserControl.DataContext>
+        <viewModel:MainViewModel/>
+    </UserControl.DataContext>-->
+    <!--d:DesignHeight="450"-->
+    <!--<Border Background ="{StaticResource =SecondaryBackgroundColor}"-->
+    <Border Background="{StaticResource ResourceKey=SecondaryBackgroundColor}"
+            CornerRadius="0,0,20,0">
+        <StackPanel>
+            <!--Do not remove-->
+
+            <Label
+                Content="Febris Messageboard"
+                Style="{StaticResource ResourceKey=TitleTheme}"/>
+            <StackPanel 
+                Orientation="Horizontal"
+                HorizontalAlignment="Center">                
+                <Border Width="500">
+                    <!--Height="150">-->
+                    <Grid>
+                        <StackPanel>
+                            <ListBox ItemsSource="{Binding Path=FebrisMessageBoard}"
+                                ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                    ScrollViewer.CanContentScroll="True"
+                                    BorderBrush="Transparent"
+                                    Height="150">
+
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <!--<DockPanel VerticalAlignment="Top">-->
+                                        <StackPanel 
+                                            Orientation="Vertical"  
+                                            Margin="0,0,0,5" 
+                                            VerticalAlignment="Center">                                            
+                                            <StackPanel 
+                                                Orientation="Horizontal"  
+                                                Margin="0,0,0,5" 
+                                                Background="Transparent">
+                                                <TextBlock 
+                                                    Name="Subject"  
+                                                    Text="{Binding Subject}"
+                                                    HorizontalAlignment="Left" 
+                                                    FontWeight="Bold" 
+                                                    FontSize="18" 
+                                                    Background="Transparent" 
+                                                    Foreground="{DynamicResource SecondaryTextColor}" 
+                                                    IsEnabled="False" 
+                                                    TextWrapping="Wrap"/>
+                                                <TextBlock Text="  "/>
+                                                <TextBlock 
+                                                    Name="Date" 
+                                                    Margin="0,0,5,0" 
+                                                    Text="{Binding TimeStamp}" 
+                                                    VerticalAlignment="Bottom" 
+                                                    Background="Transparent" 
+                                                    Foreground="{DynamicResource SecondaryTextColor}" 
+                                                    FontStyle="Italic" 
+                                                    TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock 
+                                                Name="Message" 
+                                                Text="{Binding Message}" 
+                                                Background="Transparent" 
+                                                Foreground="{DynamicResource SecondaryTextColor}" 
+                                                HorizontalAlignment="Center" 
+                                                TextWrapping="Wrap"
+                                                MaxWidth="450"
+                                                    />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <!--</DockPanel>-->
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <Label
+                Content="Local Messageboard"
+                Style="{StaticResource ResourceKey=TitleTheme}"/>
+            <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+                <Border Width="500">
+                    <!--Height="150">-->
+                    <Grid>
+                        <StackPanel>
+                            <ListBox 
+                                    ItemsSource="{Binding Path=LocalMessageBoard}"
+                                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                    ScrollViewer.CanContentScroll="True"
+                                    BorderBrush="Transparent"
+                                    Height="150">                               
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel 
+                                                Orientation="Vertical"  
+                                                Margin="0,0,0,15" 
+                                                VerticalAlignment="Center">
+                                            <!--Background="{DynamicResource FilledBoxBackgroundColor}"
+                                                >-->
+                                            <StackPanel 
+                                                    Orientation="Horizontal"  
+                                                    Margin="0,0,0,5" 
+                                                    Background="Transparent">
+                                                <TextBlock 
+                                                        Name="Subject"  
+                                                        Text="{Binding Subject}"
+                                                        HorizontalAlignment="Center" 
+                                                        FontWeight="Bold" 
+                                                        FontSize="18" 
+                                                        Background="Transparent" 
+                                                        Foreground="{DynamicResource SecondaryTextColor}" 
+                                                        IsEnabled="False" 
+                                                        TextWrapping="Wrap"/>
+                                                <TextBlock Text="  "/>
+                                                <TextBlock 
+                                                            Name="Date" 
+                                                            Margin="0,0,5,0" 
+                                                            Text="{Binding TimeStamp}" 
+                                                            VerticalAlignment="Bottom" 
+                                                            Background="Transparent" 
+                                                            Foreground="{DynamicResource SecondaryTextColor}" 
+                                                            FontStyle="Italic" 
+                                                            TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock 
+                                                            Name="Message" 
+                                                            Text="{Binding Message}" 
+                                                            Background="Transparent" 
+                                                            Foreground="{DynamicResource SecondaryTextColor}" 
+                                                            HorizontalAlignment="Center" 
+                                                            TextWrapping="Wrap"
+                                                            MaxWidth="450"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!--Do not remove-->
+        </StackPanel>
+    </Border>
+</UserControl>

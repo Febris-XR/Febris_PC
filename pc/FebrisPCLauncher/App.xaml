@@ -1,0 +1,96 @@
+﻿<Application x:Class="Febris.PCLauncherV3.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Febris.PCLauncherV3"
+             xmlns:viewModel="clr-namespace:Febris.PCLauncherV3.MVVM.ViewModel"
+             xmlns:view="clr-namespace:Febris.PCLauncherV3.MVVM.View"
+             >
+
+    <!--StartupUri="MainWindow.xaml">-->
+    <Application.Resources>        
+        <!--<FontFamily x:Key="FontAwesome">/Resources/Icons/fa-solid-900.ttf#FontAwesome</FontFamily>-->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--Menu-->
+                <ResourceDictionary Source="Theme/RadioMenu.xaml"/>
+                <!--Generic-->
+                <ResourceDictionary Source="Theme/TitleTheme.xaml"/>
+                <ResourceDictionary Source="Theme/BodyTextTheme.xaml"/>
+                <ResourceDictionary Source="Theme/SearchBoxTheme.xaml"/>
+                <ResourceDictionary Source="Theme/InputBoxTheme.xaml"/>
+                <ResourceDictionary Source="Theme/PasswordInputBoxTheme.xaml"/>
+                <ResourceDictionary Source="Theme/ListBoxTheme.xaml"/>
+                <ResourceDictionary Source="Theme/ScrollTheme.xaml"/>
+                <!--Lists-->
+                <ResourceDictionary Source="Theme/MessageboardTheme.xaml"/>
+                <ResourceDictionary Source="Theme/UserListTheme.xaml"/>
+                <ResourceDictionary Source="Theme/ModuleListTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!--<FontFamily x:Key="FontAwesome">/Resources/Icons/fa-regular-400.ttf#FontAwesome</FontFamily>-->                        
+            <!--Icons-->
+            <!--<TextBlock x:Key="LaunchIcon">&#xf04b;</TextBlock>
+            <TextBlock x:Key="ListIcon">&#xf022;</TextBlock>
+            <TextBlock x:Key="GradCapIcon">&#xf19d;</TextBlock>
+            <TextBlock x:Key="UsersIcon">&#xf0c0;</TextBlock>
+            <TextBlock x:Key="CogsIcon">&#xf085;</TextBlock>
+            <TextBlock x:Key="FilmIcon">&#xf008;</TextBlock>
+            <TextBlock x:Key="FileIcon">&#xf15b;</TextBlock>
+            <TextBlock x:Key="MessageBoardIcon">&#xf075;</TextBlock>
+            <TextBlock x:Key="AddressCardIcon">&#xf2bb;</TextBlock>
+            <TextBlock x:Key="InfoIcon">&#xf05a;</TextBlock>
+            <TextBlock x:Key="RefreshIcon">&#xf01e;</TextBlock>
+            <TextBlock x:Key="VRIcon">&#xf729;</TextBlock>
+            <TextBlock x:Key="WiFiIcon">&#xf1eb;</TextBlock>
+            <TextBlock x:Key="LinkIcon">&#xf0c1;</TextBlock>
+            <TextBlock x:Key="BluetoothIcon">&#xf293;</TextBlock>
+            <TextBlock x:Key="UploadIcon">&#xf56f;</TextBlock>
+            <TextBlock x:Key="TrashIcon">&#xf1f8;</TextBlock>
+            <TextBlock x:Key="CheckIcon">&#xf00c;</TextBlock>
+            <TextBlock x:Key="Battery_Empty">&#xf244;</TextBlock>
+            <TextBlock x:Key="Battery_Quarter">&#xf246;</TextBlock>
+            <TextBlock x:Key="Battery_Half">&#xf242;</TextBlock>
+            <TextBlock x:Key="Battery_ThreeQuarter">&#xf241;</TextBlock>
+            <TextBlock x:Key="Battery_Full">&#xf240;</TextBlock>
+            <TextBlock x:Key="VideoStreamIcon">&#xf87c;</TextBlock>-->
+            
+            
+            <!--defining some colors to use in our template and style section-->
+            <SolidColorBrush x:Key="PrimaryButtonColor">#26B99A</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryBackgroundColor">#2A3F54</SolidColorBrush>
+            <SolidColorBrush x:Key="SecondaryBackgroundColor">#F7F7F7</SolidColorBrush>
+            <SolidColorBrush x:Key="BoxBackgroundColor">#fff</SolidColorBrush>
+            <SolidColorBrush x:Key="FilledBoxBackgroundColor">#D3D3D3</SolidColorBrush>
+            <!--<SolidColorBrush x:Key="FilledBoxBackgroundColor">#6c757d</SolidColorBrush>-->
+            <!--TextColors-->
+            <SolidColorBrush x:Key="PrimaryTextColor">#5A738E</SolidColorBrush>
+            <SolidColorBrush x:Key="SecondaryTextColor">#73879C</SolidColorBrush>
+            <SolidColorBrush x:Key="LightTextColor">#f8f9fa</SolidColorBrush>
+
+            <DataTemplate DataType="{x:Type viewModel:ConfigViewModel}">
+                <view:ConfigView/>                
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
+                <view:HomeView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:LaunchViewModel}">
+                <view:LaunchView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ModuleViewModel}">
+                <view:ModuleView/>
+            </DataTemplate>            
+            <DataTemplate DataType="{x:Type viewModel:StatementViewModel}">
+                <view:StatementView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:UserViewModel}">
+                <view:UserView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:VideoViewModel}">
+                <view:VideoView/>
+            </DataTemplate>
+
+
+
+        </ResourceDictionary>       
+    </Application.Resources>   
+</Application>

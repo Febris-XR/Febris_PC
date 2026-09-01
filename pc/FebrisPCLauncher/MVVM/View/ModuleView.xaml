@@ -1,0 +1,112 @@
+﻿<UserControl x:Class="Febris.PCLauncherV3.MVVM.View.ModuleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Febris.PCLauncherV3.MVVM.View"
+             xmlns:viewModel="clr-namespace:Febris.PCLauncherV3.MVVM.ViewModel"
+             mc:Ignorable="d" 
+             d:DesignWidth="600"
+             d:DesignHeight="425"
+             Margin="0"
+             Background="Transparent">
+    <!--d:DesignHeight="Auto"-->
+    <!--<UserControl.DataContext>
+        <viewModel:MainViewModel/>
+    </UserControl.DataContext>-->
+    <!--"{StaticResource ResourceKey=SecondaryBackgroundColor}">-->
+    <Border Background="{StaticResource ResourceKey=SecondaryBackgroundColor}" CornerRadius="0,0,20,0">
+
+
+        <StackPanel Orientation="Horizontal">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label
+                Content="Module List"
+                Style="{StaticResource ResourceKey=TitleTheme}"/>
+                    <TextBox Style="{StaticResource ResourceKey=SearchBoxTheme}"
+                            Width="150"
+                             Margin="5"
+                             Name="ModuleSearch"                                 
+                             Text="{Binding Path=ModuleSearch,
+                             UpdateSourceTrigger=PropertyChanged}" 
+                             />
+                </StackPanel>
+                <StackPanel MaxHeight="300">
+                    <ListBox ItemsSource="{Binding Path=SearchResultList}"                        
+                             Style="{StaticResource ResourceKey=ModuleListTheme}" 
+                             SelectedItem="{Binding Path=DisplayedModule}"
+                             Name="ModuleSelectBox"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible"
+                             ScrollViewer.CanContentScroll="True"
+                             Height="275">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name, Mode=OneWay}"/>
+                                    <TextBlock Text=" "/>
+                                    <TextBlock Text="{Binding Version, Mode=OneWay}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </StackPanel>
+
+
+            <StackPanel MaxWidth="350">
+                <Label Content="Module Information" 
+                       Style="{StaticResource ResourceKey=TitleTheme}"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Name:" 
+                       Style="{StaticResource ResourceKey=BodyTextTheme}"
+                       FontWeight="Bold"/>
+                    <Label Name="Name"
+                           Style="{StaticResource ResourceKey=BodyTextTheme}"
+                           Content="{Binding Path=DisplayedModule.Name}"/>
+                    <!--,ElementName=ModuleList, 
+                                    Mode=OneWay}"/>-->
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Description:" 
+                       Style="{StaticResource ResourceKey=BodyTextTheme}"
+                       FontWeight="Bold"/>
+                    <Label Style="{StaticResource ResourceKey=BodyTextTheme}"
+                           Content="{Binding Path=DisplayedModule.Description}"/>                       
+                                    <!--ElementName=ModuleList, 
+                                    Mode=OneWay}"/> -->
+                </StackPanel>
+
+                <Button
+                    Margin="50"
+                    Height="25"
+                    Width="100"
+                    Background="{DynamicResource PrimaryButtonColor}"
+                    Foreground="{DynamicResource LightTextColor}"
+                    FontWeight="Bold"                    
+                    Content="Select Module"
+                    Command="{Binding Path=SelectModuleCommand}"
+                    >                   
+                    <Button.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="10"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Selected Module:" 
+                       Style="{StaticResource ResourceKey=BodyTextTheme}"
+                       FontWeight="Bold"/>
+                    <Label Name="SelectedModuleName"                           
+                           Style="{StaticResource ResourceKey=BodyTextTheme}"
+                           Content="{Binding Path=SelectedModule.Name}"/>
+                </StackPanel>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Border>
+</UserControl>

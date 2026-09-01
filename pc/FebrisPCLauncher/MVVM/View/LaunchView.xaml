@@ -1,0 +1,112 @@
+﻿<UserControl x:Class="Febris.PCLauncherV3.MVVM.View.LaunchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Febris.PCLauncherV3.MVVM.View"
+             xmlns:vm="clr-namespace:Febris.PCLauncherV3.MVVM.ViewModel"
+             mc:Ignorable="d"              
+             Margin="0"             
+             d:DesignWidth="600"             
+             d:DesignHeight="425"
+             Background="Transparent">
+    <!--d:DesignHeight="Auto"-->
+
+    <Border 
+        Background="{StaticResource ResourceKey=SecondaryBackgroundColor}" 
+        CornerRadius="0,0,20,0">
+        
+
+        <StackPanel Margin="20">
+            <Label
+                Content="Ready To Launch!"
+                Style="{StaticResource ResourceKey=TitleTheme}"/>
+            <StackPanel Margin="20">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="User Selected " 
+                       Style="{StaticResource ResourceKey=BodyTextTheme}"
+                       FontWeight="Bold"/>
+                    <CheckBox Name="UserSelected"  
+                              VerticalAlignment="Center"
+                             IsChecked="{Binding Path=UserSelected}"                              
+                              IsEnabled="False"
+                             />
+                    <!--IsChecked="{Binding Path=UserVM.SelectedUser, RelativeSource={RelativeSource AncestorType={x:Type vm:MainViewModel}}}"-->
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Module Selected "                        
+                       FontWeight="Bold"
+                       Style="{StaticResource ResourceKey=BodyTextTheme}"/>
+                    <CheckBox Name="ModuleSelected"  
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding Path=ModuleSelected}"
+                              IsEnabled="False"/>
+                </StackPanel>
+
+
+                <!--<StackPanel Orientation="Horizontal">
+                    <Button
+                    Margin="20"
+                    Height="25"
+                    Width="100"
+                    Background="{DynamicResource PrimaryButtonColor}"
+                    Foreground="{DynamicResource LightTextColor}"
+                    FontWeight="Bold"                    
+                    Content="Statement Files"
+                    Command="{Binding MainViewModel.StatementVMCommand, RelativeSource={RelativeSource AncestorType=Window}}"                    
+                    >
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button
+                    Margin="20"
+                    Height="25"
+                    Width="100"
+                    Background="{DynamicResource PrimaryButtonColor}"
+                    Foreground="{DynamicResource LightTextColor}"
+                    FontWeight="Bold"                    
+                    Content="Video Files"                    
+                    Command="{Binding MainViewModel.VideoVMCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    >
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>-->
+
+                <!-- ROADMAP 22: the "Record Session" checkbox that sat here is GONE. Whether a
+                     session is recorded is the educator's decision, set per cohort in the portal
+                     and derived by the node, and the owner's model is that nothing about it shows
+                     up on the learner's screen. -->
+
+
+
+
+               
+                
+                <Button
+                    HorizontalAlignment="Left"
+                    Margin="20"
+                    Height="25"
+                    Width="100"
+                    Background="{DynamicResource PrimaryButtonColor}"
+                    Foreground="{DynamicResource LightTextColor}"
+                    FontWeight="Bold"                    
+                    Content="Launch"                    
+                    Click="Launch_Click"
+                    >
+                    <Button.Resources>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="CornerRadius" Value="10"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>
