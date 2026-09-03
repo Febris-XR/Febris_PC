@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the Febris PC Suite MSI.
 
-    python pc/packaging/build-msi.py [--version 0.2.0] [--out DIR]
+    python pc/packaging/build-msi.py --version 0.2.0 [--out DIR]
 
 WHY THIS EXISTS. The v0.2.0 installer was built by hand and the recipe lived in a temporary
 directory, which meant a published artifact nobody could reproduce. This is that recipe.
@@ -215,7 +215,13 @@ def write_wxs(stage_dir, out, version):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--version", default="0.2.0")
+    # No default. A default is a version number that lives in source, which is the whole problem
+    # this pipeline exists to remove. Forgetting --version used to produce an installer named
+    # 0.2.0 whatever you were actually building, and nothing downstream would notice until the
+    # filename disagreed with the feed row. Making it required turns that into an argument error.
+    ap.add_argument("--version", required=True,
+                    help="MAJOR.MINOR.PATCH stamped into the filename and the WiX package. On a "
+                         "tag build the workflow passes the tag.")
     ap.add_argument("--config", default="Release")
     ap.add_argument("--out", default=os.path.join(PC, "packaging", "out"))
     ap.add_argument("--skip-build", action="store_true")

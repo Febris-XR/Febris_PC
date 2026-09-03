@@ -5,10 +5,14 @@
 # workflow runs it unmodified. Anything runner-specific belongs here, not in the script, so the
 # local and CI paths cannot drift.
 #
-# WHY THE MSI JOB IS MANUAL. It compiles five solutions and is the expensive job in this
-# repository. Running it on every push would burn the Actions allowance for an artifact that is
-# only wanted at release. Pull requests get the cheap syntax job instead, which is what actually
-# catches a broken packaging script.
+# WHEN THE MSI JOB RUNS. On a version tag, and on a manual dispatch. Not on ordinary pushes,
+# because it compiles five solutions and is the expensive job in this repository, and the
+# artifact is only wanted at release. Pull requests get the cheap syntax job instead, which is
+# what actually catches a broken packaging script.
+#
+# THE TAG IS THE VERSION. It used to live in eight hand-edited places with nothing comparing
+# them, so an installer could be named one version while the feed advertised another. On a tag
+# build there is nothing to type, and the value is validated before anything is compiled.
 #
 # WHY MSBuild IS NOT PINNED TO A PATH. Febris.PCModuleManagerV3 carries a COMReference and
 # `dotnet build` dies MSB4803 on it, so the Visual Studio MSBuild is required. This runner ships
@@ -21,12 +25,19 @@
 name: PC Suite MSI
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       version:
-        description: Version stamped into the MSI filename and the WiX package
+        description: >
+          Version stamped into the MSI filename and the WiX package, as MAJOR.MINOR.PATCH.
+          Ignored on a tag build, which takes the version from the tag instead so the two cannot
+          disagree. There is no default on purpose, because a default is a version number living
+          in the pipeline, which is what this is meant to remove.
         required: true
-        default: "0.2.0"
+        default: ""
       ffmpeg_url:
         description: >
           URL of a trusted ffmpeg win64 zip. Leave empty to build without ffmpeg, which produces
@@ -65,10 +76,31 @@ jobs:
 
   msi:
     name: build the MSI
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'pull_request'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      # ONE SOURCE FOR THE VERSION. On a tag build the tag IS the version, so there is nothing to
+      # type and nothing to disagree with. A manual run still takes the input, because a dry run
+      # of the packaging path should not require inventing a tag. Either way the value is
+      # validated here rather than discovered later in a filename that does not match the feed.
+      - name: Resolve the version
+        id: ver
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'push') {
+            $v = '${{ github.ref_name }}' -replace '^v', ''
+            $from = 'tag ${{ github.ref_name }}'
+          } else {
+            $v = '${{ inputs.version }}'
+            $from = 'workflow input'
+          }
+          if ($v -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Version '$v' (from $from) is not MAJOR.MINOR.PATCH."
+          }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "Building $v, taken from the $from." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -84,25 +116,52 @@ jobs:
           dotnet tool install --global wix --version 5.0.2
           "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+      # A tag build carries no inputs, so the ffmpeg source falls back to repository variables.
+      # Without that a release build would silently ship an installer whose recorder cannot
+      # encode, which is exactly the failure the warning step below exists to make loud.
+      # Set FFMPEG_URL, FFMPEG_SHA256 and FFMPEG_SOURCE_URL as repository variables to make tag
+      # builds self-sufficient. A manual run's inputs win over them.
+      #
+      # THE THREE VALUES ARE RESOLVED AS A SET, NEVER FIELD BY FIELD. They describe ONE binary.
+      # Falling back per field lets a manually supplied URL inherit the previous build's digest
+      # and Corresponding Source URL, and the source half of that fails silently rather than
+      # loudly. fetch-ffmpeg.ps1 writes whatever SourceUrl it is given straight into
+      # PROVENANCE.txt, and only warns when the value is ABSENT, so a wrong value disables the
+      # very guard meant to catch it. That file is globbed into the ScreenRecorder output and
+      # staged into the MSI, so the installer would ship a GPL section 6 offer naming source that
+      # does not correspond to the bundled binary. Whichever place supplies the URL supplies all
+      # three, so they cannot be mixed.
       - name: Fetch ffmpeg
-        if: inputs.ffmpeg_url != ''
+        if: inputs.ffmpeg_url != '' || vars.FFMPEG_URL != ''
         shell: pwsh
         run: |
-          $splat = @{ Url = '${{ inputs.ffmpeg_url }}' }
-          if ('${{ inputs.ffmpeg_sha256 }}') { $splat.Sha256 = '${{ inputs.ffmpeg_sha256 }}' }
-          if ('${{ inputs.ffmpeg_source_url }}') { $splat.SourceUrl = '${{ inputs.ffmpeg_source_url }}' }
+          $url = '${{ inputs.ffmpeg_url }}'
+          if ($url) {
+            $sha = '${{ inputs.ffmpeg_sha256 }}'
+            $src = '${{ inputs.ffmpeg_source_url }}'
+            $from = 'workflow inputs'
+          } else {
+            $url = '${{ vars.FFMPEG_URL }}'
+            $sha = '${{ vars.FFMPEG_SHA256 }}'
+            $src = '${{ vars.FFMPEG_SOURCE_URL }}'
+            $from = 'repository variables'
+          }
+          Write-Host "ffmpeg triple taken from $from"
+          $splat = @{ Url = $url }
+          if ($sha) { $splat.Sha256 = $sha }
+          if ($src) { $splat.SourceUrl = $src }
           ./pc/tools/fetch-ffmpeg.ps1 @splat
 
       - name: Warn when ffmpeg was not supplied
-        if: inputs.ffmpeg_url == ''
+        if: inputs.ffmpeg_url == '' && vars.FFMPEG_URL == ''
         shell: pwsh
         run: |
           "### ffmpeg not bundled" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
-          "No ``ffmpeg_url`` was given, so the screen recorder in this MSI cannot encode. Supply one to produce a release build." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "No ffmpeg source was given, so the screen recorder in this MSI cannot encode. Pass ``ffmpeg_url`` on a manual run, or set the ``FFMPEG_URL`` repository variable so tag builds pick it up." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
 
       - name: Build the MSI
         shell: pwsh
-        run: python pc/packaging/build-msi.py --version '${{ inputs.version }}'
+        run: python pc/packaging/build-msi.py --version '${{ steps.ver.outputs.version }}'
 
       - name: Record the artifact digest
         shell: pwsh
@@ -116,7 +175,7 @@ jobs:
           # splits each intended line into three elements. The job still goes green and the
           # artifact still uploads, so nothing catches it, and the summary an operator copies into
           # the feed is invalid JSON. Letting the serialiser build it removes the trap entirely.
-          $msi = Get-Item "pc/packaging/out/FebrisPCSuite-${{ inputs.version }}-win-x64.msi"
+          $msi = Get-Item "pc/packaging/out/FebrisPCSuite-${{ steps.ver.outputs.version }}-win-x64.msi"
           $hash = (Get-FileHash $msi.FullName -Algorithm SHA256).Hash.ToLower()
           $entry = [ordered]@{ fileName = $msi.Name; sizeBytes = $msi.Length; sha256 = $hash }
           $summary = @(
@@ -132,7 +191,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: FebrisPCSuite-${{ inputs.version }}-win-x64
-          path: pc/packaging/out/FebrisPCSuite-${{ inputs.version }}-win-x64.msi
+          name: FebrisPCSuite-${{ steps.ver.outputs.version }}-win-x64
+          path: pc/packaging/out/FebrisPCSuite-${{ steps.ver.outputs.version }}-win-x64.msi
           if-no-files-found: error
           retention-days: 14
