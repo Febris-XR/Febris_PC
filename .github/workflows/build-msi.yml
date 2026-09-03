@@ -1,0 +1,138 @@
+# Builds the Febris PC Suite MSI on a GitHub-hosted runner.
+#
+# The v0.2.0 installer was built by hand on one developer's machine, which meant a published
+# artifact nobody else could reproduce. pc/packaging/build-msi.py is that recipe, and this
+# workflow runs it unmodified. Anything runner-specific belongs here, not in the script, so the
+# local and CI paths cannot drift.
+#
+# WHY THE MSI JOB IS MANUAL. It compiles five solutions and is the expensive job in this
+# repository. Running it on every push would burn the Actions allowance for an artifact that is
+# only wanted at release. Pull requests get the cheap syntax job instead, which is what actually
+# catches a broken packaging script.
+#
+# WHY MSBuild IS NOT PINNED TO A PATH. Febris.PCModuleManagerV3 carries a COMReference and
+# `dotnet build` dies MSB4803 on it, so the Visual Studio MSBuild is required. This runner ships
+# Enterprise while a developer box is usually Community, so the script locates it through vswhere
+# rather than assuming an edition. setup-msbuild is belt and braces, covering the PATH branch.
+#
+# THE MSI IS NOT CODE SIGNED. That is the same state as the hand-built v0.2.0 and is recorded in
+# pc/packaging/build-msi.py rather than silently accepted here.
+
+name: PC Suite MSI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version stamped into the MSI filename and the WiX package
+        required: true
+        default: "0.2.0"
+      ffmpeg_url:
+        description: >
+          URL of a trusted ffmpeg win64 zip. Leave empty to build without ffmpeg, which produces
+          a working installer whose screen recorder cannot encode.
+        required: false
+        default: ""
+      ffmpeg_sha256:
+        description: Expected sha256 of that zip. Strongly recommended whenever a URL is given.
+        required: false
+        default: ""
+      ffmpeg_source_url:
+        description: >
+          Where the Corresponding Source for that exact ffmpeg build can be obtained. ffmpeg is
+          GPL, so bundling it carries a section 6 duty. Recorded into PROVENANCE.txt.
+        required: false
+        default: ""
+  pull_request:
+    paths:
+      - "pc/packaging/**"
+      - ".github/workflows/build-msi.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  script:
+    name: packaging script is valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Compile the packaging script
+        run: python -m py_compile pc/packaging/build-msi.py
+
+  msi:
+    name: build the MSI
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Install WiX 5
+        shell: pwsh
+        run: |
+          # WiX 7 refuses to build until you accept the Open Source Maintenance Fee EULA, which is
+          # a licensing commitment rather than a build step. 5.0.2 is the pinned version.
+          dotnet tool install --global wix --version 5.0.2
+          "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Fetch ffmpeg
+        if: inputs.ffmpeg_url != ''
+        shell: pwsh
+        run: |
+          $splat = @{ Url = '${{ inputs.ffmpeg_url }}' }
+          if ('${{ inputs.ffmpeg_sha256 }}') { $splat.Sha256 = '${{ inputs.ffmpeg_sha256 }}' }
+          if ('${{ inputs.ffmpeg_source_url }}') { $splat.SourceUrl = '${{ inputs.ffmpeg_source_url }}' }
+          ./pc/tools/fetch-ffmpeg.ps1 @splat
+
+      - name: Warn when ffmpeg was not supplied
+        if: inputs.ffmpeg_url == ''
+        shell: pwsh
+        run: |
+          "### ffmpeg not bundled" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "No ``ffmpeg_url`` was given, so the screen recorder in this MSI cannot encode. Supply one to produce a release build." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - name: Build the MSI
+        shell: pwsh
+        run: python pc/packaging/build-msi.py --version '${{ inputs.version }}'
+
+      - name: Record the artifact digest
+        shell: pwsh
+        run: |
+          # These three values are exactly what Febris_ClientDist records in the feed's
+          # contains[] entry for the PC row, so they are emitted in the shape they are consumed.
+          #
+          # Built with ConvertTo-Json rather than by gluing strings together. In the PowerShell
+          # grammar an array literal binds tighter than "+", so a list written as
+          # '"x": "' + $v + '",', '"y": ...' concatenates ARRAYS rather than strings and silently
+          # splits each intended line into three elements. The job still goes green and the
+          # artifact still uploads, so nothing catches it, and the summary an operator copies into
+          # the feed is invalid JSON. Letting the serialiser build it removes the trap entirely.
+          $msi = Get-Item "pc/packaging/out/FebrisPCSuite-${{ inputs.version }}-win-x64.msi"
+          $hash = (Get-FileHash $msi.FullName -Algorithm SHA256).Hash.ToLower()
+          $entry = [ordered]@{ fileName = $msi.Name; sizeBytes = $msi.Length; sha256 = $hash }
+          $summary = @(
+            '### MSI built'
+            ''
+            '```json'
+            ($entry | ConvertTo-Json)
+            '```'
+            ''
+            'Not code signed. Targets need the .NET 8 Desktop Runtime.'
+          )
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FebrisPCSuite-${{ inputs.version }}-win-x64
+          path: pc/packaging/out/FebrisPCSuite-${{ inputs.version }}-win-x64.msi
+          if-no-files-found: error
+          retention-days: 14
