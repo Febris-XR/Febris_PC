@@ -37,17 +37,29 @@ Enterprise. Set `MSBUILD_PATH` if you have a side-by-side install and want a spe
 ## Building it in CI
 
 `.github/workflows/build-msi.yml` runs this same script on `windows-latest`, so there is no
-second recipe to keep in step. It is `workflow_dispatch` only, because compiling five solutions
-is the expensive job in this repository and the artifact is only wanted at release. Pull requests
-that touch this directory get a syntax check instead.
+second recipe to keep in step. It runs on a `v*` tag push and on a manual dispatch, not on
+ordinary pushes, because compiling five solutions is the expensive job in this repository and the
+artifact is only wanted at release. Pull requests that touch this directory get a syntax check
+instead.
+
+**On a tag build the tag is the version.** Push `v0.2.1` and the job builds 0.2.1. There is
+nothing to type and nothing to disagree with, and the shape is validated before anything is
+compiled. A manual dispatch still asks for the version, so the packaging path can be exercised
+without inventing a tag. `--version` has no default anywhere, in the script or the workflow,
+because a default is a version number living in the pipeline and that is what this removes.
 
 The run prints the MSI filename, size and sha256 to the job summary already shaped as the
 `contains[]` entry the distribution feed records, so publishing a release is a copy rather than a
 re-derivation.
 
-Supply `ffmpeg_url`, `ffmpeg_sha256` and `ffmpeg_source_url` for a release build. Leaving them
-empty still produces a valid installer, but its screen recorder cannot encode, and the run says
-so in the summary rather than letting it pass silently.
+**ffmpeg.** Supply `ffmpeg_url`, `ffmpeg_sha256` and `ffmpeg_source_url` for a release build, or
+set `FFMPEG_URL`, `FFMPEG_SHA256` and `FFMPEG_SOURCE_URL` as repository variables so tag builds,
+which carry no inputs, can find them. The three are read as a set from whichever place supplies
+the URL, never mixed between the two, because they describe one binary and `fetch-ffmpeg.ps1`
+writes the source URL it is handed straight into the `PROVENANCE.txt` that ships inside the MSI.
+
+Leaving ffmpeg unset still produces a valid installer, but its screen recorder cannot encode, and
+the run says so in the summary rather than letting it pass silently.
 
 ## The ffmpeg double-copy trap
 
