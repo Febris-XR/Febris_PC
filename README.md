@@ -68,10 +68,23 @@ redistribute it. See [pc/THIRD-PARTY-NOTICES.md](pc/THIRD-PARTY-NOTICES.md).
 
 ## Distribution
 
-This repository ships **source and a zip**, not an installer. The Visual Studio installer project
-that used to build an MSI is deliberately not here: it is a legacy `.vdproj` that hardcoded three
-absolute paths naming a specific build machine. Whether the suite eventually ships as an MSI, an
-MSIX or stays a zip is an open decision.
+The suite ships as a **Windows MSI**. The recipe is
+[pc/packaging/build-msi.py](pc/packaging/build-msi.py), documented in
+[pc/packaging/README.md](pc/packaging/README.md), and
+[.github/workflows/build-msi.yml](.github/workflows/build-msi.yml) runs that same script on a
+GitHub-hosted runner, so the published installer is reproducible rather than built by hand on
+somebody's desk.
+
+The installer is built with WiX. The old Visual Studio setup project is deliberately not here,
+because it was a legacy `.vdproj` that hardcoded three absolute paths naming a specific build
+machine, and Visual Studio 2022 cannot build that project type without an extension.
+
+The MSI is **not code signed**, and the applications are framework-dependent, so a target machine
+needs the .NET 8 Desktop Runtime. Both are recorded states rather than oversights.
+
+Released installers are indexed by the distribution feed at
+[Febris-XR/Febris_ClientDist](https://github.com/Febris-XR/Febris_ClientDist), which is what the
+download page reads.
 
 ## Limits worth knowing
 
