@@ -6,7 +6,7 @@ Ship this file with the installer.
 
 Vendored source-tree components that are not shipped as binaries (for example the `gentelella` admin
 theme under the portal `wwwroot/`) are tracked separately in
-[`../docs/OSS_RELEASE_MANIFEST.md`](../docs/OSS_RELEASE_MANIFEST.md) §3.
+the project's release manifest, which is workshop-internal and not published with this repository.
 
 ---
 
@@ -73,7 +73,7 @@ Two alternatives change that calculus:
 - **Windows Media Foundation** ships an H.264 encoder as part of Windows. Nothing third-party is
   redistributed, so there is no GPL obligation and no separate patent posture to take. It costs more
   code and is Windows-only, which this tier already is. See
-  [`../docs/OSS_RELEASE_MANIFEST.md`](../docs/OSS_RELEASE_MANIFEST.md) §3.
+  the project's release manifest, which is workshop-internal and not published with this repository.
 
 > Not legal advice. The licence facts above are verifiable from the binary. Confirm the compliance
 > mechanics with counsel before any public release.
